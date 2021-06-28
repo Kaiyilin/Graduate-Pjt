@@ -1,2 +1,2 @@
 # Graduate-Pjt
-Summarise to work I have done in graduate school
+The summary to the work I have done in graduate school
