@@ -1,23 +1,6 @@
 # Data preparation
 
 from functions.All_functions import *
-from functions.cm_tensorboard import *
-
-
-def log_confusion_matrix(epoch, logs):
-  # Use the model to predict the values from the validation dataset.
-  val_pred_raw = model.predict(val_images)
-  val_pred = np.argmax(val_pred_raw, axis=1)
-
-  # Calculate the confusion matrix.
-  cm = sklearn.metrics.confusion_matrix(val_labels, val_pred)
-  # Log the confusion matrix as an image summary.
-  figure = plot_confusion_matrix(cm, class_names=class_names)
-  cm_image = plot_to_image(figure)
-
-  # Log the confusion matrix as an image summary.
-  with file_writer_cm.as_default():
-    tf.summary.image("Confusion Matrix", cm_image, step=epoch)
 
 def split_and_channel(c,array):
     array_val = array[:c,:,:,:]

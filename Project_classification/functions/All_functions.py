@@ -41,44 +41,14 @@ print('\nImport completed')
 
 # set the dictionary for files
 dir= {
-    'BA':'/home/kaiyi/Data/BrCA_Map_2/c+/mfalff',
-    'BA2':'/home/kaiyi/Data/BrCA_Map_2/c+/mreho',
-    'BB':'/home/kaiyi/Data/BrCA_Map_2/c-/mfalff',
-    'BB2':'/home/kaiyi/Data/BrCA_Map_2/c-/mreho',
-    'HC':'/home/kaiyi/Data/BrCA_Map_2/hc/mfalff',
-    'HC2':'/home/kaiyi/Data/BrCA_Map_2/hc/mreho'
+    'BA':'',
+    'BA2':'',
+    'BB':'',
+    'BB2':'',
+    'HC':'',
+    'HC2':''
     }
 
-mul_dir={
-        'BA':'/home/kaiyi/Data/BrCA_Map_mult/c+/mfalff',
-        'BA2':'/home/kaiyi/Data/BrCA_Map_mult/c+/mreho',
-        'BA3':'/home/kaiyi/Data/BrCA_Map_mult/c+/dif_iso',
-        'BA4':'/home/kaiyi/Data/BrCA_Map_mult/c+/dif_nqa',
-        'BA5':'/home/kaiyi/Data/BrCA_Map_mult/c+/dif_gfa',
-        'BB':'/home/kaiyi/Data/BrCA_Map_mult/c-/mfalff',
-        'BB2':'/home/kaiyi/Data/BrCA_Map_mult/c-/mreho',
-        'BB3':'/home/kaiyi/Data/BrCA_Map_mult/c-/dif_iso',
-        'BB4':'/home/kaiyi/Data/BrCA_Map_mult/c-/dif_nqa',
-        'BB5':'/home/kaiyi/Data/BrCA_Map_mult/c-/dif_gfa',
-        'HC':'/home/kaiyi/Data/BrCA_Map_mult/hc/mfalff',
-        'HC2':'/home/kaiyi/Data/BrCA_Map_mult/hc/mreho',
-        'HC3':'/home/kaiyi/Data/BrCA_Map_mult/hc/dif_iso',
-        'HC4':'/home/kaiyi/Data/BrCA_Map_mult/hc/dif_nqa',
-        'HC5':'/home/kaiyi/Data/BrCA_Map_mult/hc/dif_gfa'
-        }
-        
-gfdir = {'leff':'/home/user/venv/kaiyi_venv/BrCA_map/GraphTheory/Leff.csv',
-      'clust':'/home/user/venv/kaiyi_venv/BrCA_map/GraphTheory/Clust.csv',
-      'mod':'/home/user/venv/kaiyi_venv/BrCA_map/GraphTheory/Mod.csv',
-      'trans':'/home/user/venv/kaiyi_venv/BrCA_map/GraphTheory/Trans.csv',
-      'assort':'/home/user/venv/kaiyi_venv/BrCA_map/GraphTheory/Assort.csv',
-      'path':'/home/user/venv/kaiyi_venv/BrCA_map/GraphTheory/Path.csv',
-      'geff':'/home/user/venv/kaiyi_venv/BrCA_map/GraphTheory/Geff.csv'}
-
-mul_df = {"BA_tr":"/home/user/venv/kaiyi_venv/mul_dataframe/BA_list.csv",
-          "BB_tr":"/home/user/venv/kaiyi_venv/mul_dataframe/BB_list.csv",
-          "HC_tr":"/home/user/venv/kaiyi_venv/mul_dataframe/HC_list.csv",
-          "val":"/home/user/venv/kaiyi_venv/mul_dataframe/val_df.csv" }
 
 # Data Preprocessing
 def data_preprocessing(image):
@@ -648,32 +618,7 @@ def Conv_SE_block(input, filters, kernel_size, param, ratio, SE = True):
         y=y
     y = BatchNormalization()(y)
     y = Activation('relu')(y)
-    return y
-
-def create_model():
-    input1 = Input(shape=(53,63,52,1))
-    conv11 = Conv3D(128, (3,3,3), padding='same', activation='relu',kernel_initializer='he_normal',kernel_regularizer=l2(0.0002))(input1)
-    conv12 = Conv3D(64, (3,3,3), padding='same', activation='relu',kernel_initializer='he_normal',kernel_regularizer=l2(0.0002))(conv11)
-    pool12 = MaxPooling3D(pool_size=(2, 2, 2))(conv12)
-    conv13 = Conv3D(32, (3,3,3), padding='same', activation='relu',kernel_initializer='he_normal',kernel_regularizer=l2(0.0002))(pool12)
-    conv14 = Conv3D(16, (3,3,3), padding='same', activation='relu',kernel_initializer='he_normal',kernel_regularizer=l2(0.0002))(conv13)
-    pool13 = MaxPooling3D(pool_size=(2, 2, 2))(conv14)
-    inc = inception_module3D(pool13,32)
-    flat1 = Flatten()(inc)
-
-    # interpretation model
-    hidden1 = Dense(64, activation='relu')(flat1)
-    hidden2 = Dense(64, activation='relu')(hidden1)
-    drop1 = Dropout(0.5)(hidden2)
-    hidden3 = Dense(32, activation='relu')(hidden2)
-    drop2 = Dropout(0.4)(hidden3)
-    hidden4 = Dense(16, activation='relu')(drop2)
-    hidden5 = Dense(8, activation='relu')(hidden4)
-    drop3 = Dropout(0.2)(hidden3)
-    output = Dense(2, activation='softmax')(hidden5)
-    model = Model(inputs=input1, outputs=output)
-    print(model.summary())
-    return model    
+    return y    
 
 
 # model training
@@ -708,6 +653,8 @@ logdir="/home/kaiyi/logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 # model checkpoint
 checkpoint_dir ="/home/kaiyi/trckpt/"+ datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 checkpoint_prefix = os.path.join(checkpoint_dir, "weights-{epoch:02d}.hdf5")
+
+
 class PrintLR(tf.keras.callbacks.Callback):
   def on_epoch_end(self, epoch, logs=None):
     print('\nLearning rate for epoch {} is {}'.format(epoch + 1,

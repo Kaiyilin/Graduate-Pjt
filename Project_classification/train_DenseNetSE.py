@@ -1,13 +1,11 @@
+import pymongo, logging
 from functions.All_functions import *
+from Data_preparation import *
 from functions.cm_tensorboard import *
-from functions.Grad_CAM_3D_functions import Grad_CAM_function
-from Data_alff_BAHC_64_preparation import *
-#from Data_f_alff_64 import *
-import logging
+from functions.classVis import IntegratedGradients
+from densenet3d.DenseNet_swish_se import DenseNet3Dbuilder 
+from sklearn.metrics import roc_curve, roc_auc_score, precision_score, recall_score, accuracy_score, f1_score
 
-logging.basicConfig(filename = '/home/kaiyi/Project_classification/Execution_record.log', level = logging.WARNING, format = '%(filename)s:%(message)s')
-
-# Data Preparation
 
 def log_confusion_matrix(epoch, logs):
   # Use the model to predict the values from the validation dataset.
@@ -24,9 +22,10 @@ def log_confusion_matrix(epoch, logs):
   with file_writer_cm.as_default():
     tf.summary.image("Confusion Matrix", cm_image, step=epoch)
 
+
+logging.basicConfig(filename = '/home/kaiyi/Project_classification/Execution_record.log', level = logging.WARNING, format = '%(filename)s:%(message)s')
+
 class_names = ['HC', 'C+']
-
-
 _buffer_size = 120
 _batch_size = 5
 _num_classes = 2
@@ -34,7 +33,7 @@ _bottleneckRatio = 4
 _gr = 16
 _lr = 0.01
 
-from densenet3d.DenseNet_swish import DenseNet3Dbuilder 
+
 loss = tf.keras.losses.BinaryCrossentropy()
 opt3 = tf.keras.optimizers.SGD(lr=_lr, momentum=0.9, nesterov=True)
 
@@ -56,7 +55,6 @@ cm_callback = keras.callbacks.LambdaCallback(on_epoch_end=log_confusion_matrix)
 with strategy.scope():
     model = DenseNet3Dbuilder.build_densenet_121(input_shape = (64, 64, 64, 1), n_classes= 2, bottleneck_ratio= _bottleneckRatio , growth_rate= _gr)
     print("Building a DenseNet model")
-    #opt = tf.keras.optimizers.Adam(lr=1e-2)
     model.compile(optimizer= opt3 , loss=loss, metrics=[tf.keras.metrics.BinaryAccuracy(name='binary_accuracy', dtype=None, threshold=0.5), tf.keras.metrics.AUC()])
     print(model.summary())
 
@@ -88,5 +86,5 @@ with strategy.scope():
 
 logging.warning(
                 f"""
-                Dense121Swish_lr_{_lr}_num_classes{_num_classes}, logdir: {logdir}, ckptdir: {checkpoint_dir}, growth_rate {_gr}, bottleNeckratio: {_bottleneckRatio}.
+                Dense121SwishSE_lr_{_lr}_num_classes{_num_classes}, logdir: {logdir}, ckptdir: {checkpoint_dir}, growth_rate {_gr}, bottleNeckratio: {_bottleneckRatio}.
                 """)
