@@ -11,8 +11,7 @@ import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import Model, load_model
-from tensorflow.keras.regularizers import l2, l1, l1_l2 # By using both, you can implemented the concept of elastic dense net
-
+from tensorflow.keras.regularizers import l2, l1, l1_l2 
 from tensorflow.keras.layers import (Input, 
                                     Dense, 
                                     Dropout, 

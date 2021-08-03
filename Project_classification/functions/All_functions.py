@@ -1,8 +1,7 @@
  # Multiple Inputs
 import os
 import sys
-#import cv2
-import h5py
+import cv2
 import datetime
 import sklearn
 import random
@@ -22,9 +21,6 @@ from tensorflow.keras.layers import concatenate, add
 from sklearn.utils import shuffle
 from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split, StratifiedKFold, KFold #use for cross validation
-from sklearn import preprocessing
-#mport keras.backend.tensorflow_backend as tfback
 import scipy
 print('\nImport completed')
 
@@ -142,104 +138,6 @@ def myreadfile_pad(dirr, pad_size):
             flag = False
     return number, imgs_array, path_list
 
-def myreadfile_resample_pad(dirr, pad_size):
-    #This version can import 3D array regardless of the size
-    from nilearn.datasets import load_mni152_template
-    from nilearn.image import resample_to_img
-    template = load_mni152_template()
-
-    os.chdir(dirr)
-    number = 0
-
-    flag = True
-    imgs_array = np.array([])
-    path_list=[f for f in os.listdir(dirr) if not f.startswith('.')]
-    path_list.sort()
-    for file in path_list:
-        if file.endswith(".nii"):
-            #print(os.path.join(dirr, file))
-            img = nib.load(os.path.join(dirr, file))
-            img_array = resample_to_img(img, template)
-            img_array = img.get_fdata()
-            img_array = data_preprocessing(img_array)
-            img_array = padding_zeros(img_array, pad_size)
-            img_array = img_array.reshape(-1,img_array.shape[0],img_array.shape[1],img_array.shape[2])
-            number += 1
-            if flag == True:
-                imgs_array = img_array
-
-            else:
-                imgs_array = np.concatenate((imgs_array, img_array), axis=0)
-
-            flag = False
-    return number, imgs_array, path_list
-
-def importdata_resample(dirr,dirr1,dirr2,dirr3,dirr4,dirr5,pad_size=None):
-    def myreadfile_resample_pad(dirr, pad_size):
-        #This version can import 3D array regardless of the size
-        from nilearn.datasets import load_mni152_template
-        from nilearn.image import resample_to_img
-        template = load_mni152_template()
-
-        os.chdir(dirr)
-        number = 0
-
-        flag = True
-        imgs_array = np.array([])
-        path_list=[f for f in os.listdir(dirr) if not f.startswith('.')]
-        path_list.sort()
-        for file in path_list:
-            if file.endswith(".nii"):
-                #print(os.path.join(dirr, file))
-                img = nib.load(os.path.join(dirr, file))
-                img_array = resample_to_img(img, template)
-                img_array = img.get_fdata()
-                img_array = data_preprocessing(img_array)
-                img_array = padding_zeros(img_array, pad_size)
-                img_array = img_array.reshape(-1,img_array.shape[0],img_array.shape[1],img_array.shape[2])
-                number += 1
-                if flag == True:
-                    imgs_array = img_array
-
-                else:
-                    imgs_array = np.concatenate((imgs_array, img_array), axis=0)
-
-                flag = False
-        return number, imgs_array, path_list
-    if pad_size == None:
-      _, first_mo,  = myreadfile(dirr)
-      _, second_mo, _ = myreadfile(dirr1)
-      _, third_mo, _ = myreadfile(dirr2)
-      
-      _, first_mo2, _ = myreadfile(dirr3)
-      _, second_mo2, _ = myreadfile(dirr4)
-      _, third_mo2, _ = myreadfile(dirr5)
-      print(first_mo.shape, second_mo.shape, third_mo.shape, first_mo2.shape, second_mo2.shape, third_mo2.shape)
-      return first_mo, second_mo, third_mo, first_mo2, second_mo2, third_mo2
-
-    else:
-      _, first_mo, _ = myreadfile_resample_pad(dirr,pad_size)
-      _, second_mo, _ = myreadfile_resample_pad(dirr1,pad_size)
-      _, third_mo, _ = myreadfile_resample_pad(dirr2,pad_size)
-      
-      _, first_mo2, _ = myreadfile_resample_pad(dirr3,pad_size)
-      _, second_mo2, _ = myreadfile_resample_pad(dirr4,pad_size)
-      _, third_mo2, _ = myreadfile_resample_pad(dirr5,pad_size)
-      print(first_mo.shape, second_mo.shape, third_mo.shape, first_mo2.shape, second_mo2.shape, third_mo2.shape)
-      return first_mo, second_mo, third_mo, first_mo2, second_mo2, third_mo2
-
-def importdata(dirr,dirr1,dirr2,dirr3,dirr4,dirr5):
-    
-    a_num, first_mo, _ = myreadfile(dirr)
-    b_num, second_mo, _ = myreadfile(dirr1)
-    h_num, third_mo, _ = myreadfile(dirr2)
-    
-    a_num2, first_mo2, _ = myreadfile(dirr3)
-    b_num2, second_mo2, _ = myreadfile(dirr4)
-    h_num2, third_mo2, _ = myreadfile(dirr5)
-    print(first_mo.shape, second_mo.shape, third_mo.shape, first_mo2.shape, second_mo2.shape, third_mo2.shape)
-    return first_mo, second_mo, third_mo, first_mo2, second_mo2, third_mo2
-
 def importdata2(dirr,dirr1,dirr2,dirr3,dirr4,dirr5,pad_size=None):
 
     if pad_size == None:
@@ -264,47 +162,6 @@ def importdata2(dirr,dirr1,dirr2,dirr3,dirr4,dirr5,pad_size=None):
       h_num2, third_mo2, _ = myreadfile_pad(dirr5,pad_size)
       print(first_mo.shape, second_mo.shape, third_mo.shape, first_mo2.shape, second_mo2.shape, third_mo2.shape)
       return first_mo, second_mo, third_mo, first_mo2, second_mo2, third_mo2
-
-def importgft(filepath,i,j,k,l,m):
-    """
-    """
-    All = pd.read_csv(filepath)
-    X = All.iloc[i:j,k:l].values # switch to array
-    if m==None:
-      print(X.shape, X.ndim)
-      return X
-    else:
-      X_label = All.iloc[i:j,m].values # switch to arraymod
-      X_label = X_label.astype(float)
-      print(X.shape, X.ndim)
-      print(X_label.shape, X_label)
-      return X, X_label
-
-def importgft2(filepath,i,j):
-    """
-    Selecting Rows based on column label
-    i : the name or index of the column
-    j : the selecting rules
-    """
-    All = pd.read_csv(filepath)
-    X = All.loc[All.loc[:,i]==j,:] # switch to array
-    X_labels = X.loc[:,i].values
-    X = X.values
-    print(X.shape,X_labels.shape)
-    return X, X_labels
-
-def importgflist(dic,i,j,k,l):
-    GF = np.array([])
-    flag = True
-    for element in dic:
-      gf = importgft(gfdir[element],i,j,k,l,m=None)
-      if flag == True:
-        GF = gf
-      else:
-        GF = np.concatenate([GF, gf], axis=1)
-      flag = False
-    return GF
-
 
 def split(c,array):
     array_val = array[:c,:,:,:]
