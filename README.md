@@ -14,7 +14,8 @@ All the image data used in this project are from [ADNI dataset](http://adni.loni
 ### Phase 1: Check the image shape, range and distribution
 
 Fig 1. The data distribution of raw images </br>
-![](./Project_oneStepNorm/Data_distribution/Raw_standardised_resample/kdeplot_all.png)
+<img src="./Project_oneStepNorm/Data_distribution/Raw_standardised_resample/kdeplot_all.png" alt="./Project_oneStepNorm/Data_distribution/Raw_standardised_resample/kdeplot_all.png" width="600"/>
+
 
 We know that the range for each image are different.
 
@@ -27,8 +28,10 @@ Then standardised Raw PET 3D Neuro Dynamic images based on the preproceesing ste
 Here's the results of the pre-processed data
 
 Fig 2. The data distribution of preprocessed raw data and target data </br>
-![](./Project_oneStepNorm/Data_distribution/Raw_standardised_resample/kdeplot_007_S_1206_20120220.nii.png)
-![](./Project_oneStepNorm/Data_distribution/comparison/kdeplot_002_S_4225_20131015.nii.png)
+<img src="./Project_oneStepNorm/Data_distribution/Raw_standardised_resample/kdeplot_007_S_1206_20120220.nii.png" alt="./Project_oneStepNorm/Data_distribution/Raw_standardised_resample/kdeplot_007_S_1206_20120220.nii.png" width="600"/>
+
+<img src="./Project_oneStepNorm/Data_distribution/comparison/kdeplot_002_S_4225_20131015.nii.png" alt="./Project_oneStepNorm/Data_distribution/comparison/kdeplot_002_S_4225_20131015.nii.png" width="600"/>
+
 
 ### Phase 3: Construct a pix2pix model using Tensorflow
 
@@ -38,12 +41,15 @@ The discriminator is another self-constructed volumetric Convolutional Neural Ne
 
 The overall architectures of generators and discriminators can be seen at [here](./Project_oneStepNorm/Data_distribution/Report/)
 
+
+
 Fig 3. The learning curve of pix2pix model </br>
-![](./Project_oneStepNorm/Data_distribution/itpjt/Figure_1.png)
+
+<img src="./Project_oneStepNorm/Data_distribution/itpjt/Figure_1.png" alt="../Project_oneStepNorm/Data_distribution/itpjt/Figure_1.png" width="600"/>
 
 
 ### Phase 4: Evaluate the model
 Finally, here's the comparison between the predicted image and the target normalised image
 
 Fig. Results </br>
-![](./Project_oneStepNorm/Evaluation/testResult1/TestResult1.gif)
+<img src="/Project_oneStepNorm/Evaluation/testResult1/TestResult1.gif" width="600"/>
