@@ -25,4 +25,13 @@ The original paper of pix2pix can be seen at [here](https://arxiv.org/abs/1611.0
 In my project, I modified the generator into a self-constructed volumetric [U-Net](https://arxiv.org/abs/1505.04597)</br>
 The discriminator is another self-constructed volumetric Convolutional Neural Network (CNN)
 
+Fig. Generator
+![](Images/loss.png)
+
+Fig. Discriminator
+![](Images/loss.png)
+
 ### Phase 4: Evaluate the model
+
+Fig. Results
+![](Images/loss.png)
