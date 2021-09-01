@@ -30,7 +30,7 @@ Due to some privacy ussue, this part cannot be shown here.
 
 ### Phase 3: Construct 2 Volumetric CNN model using Tensorflow
 
-#### The CNN model I picked
+> #### The CNN model I picked
 <ol> 
   <li> SE-ResNet-50 </li>
   <li> DenseNet-121 </li>
