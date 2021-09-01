@@ -63,7 +63,7 @@ SE-ResNet-50 (mean ± SD) |0.8 (0.07)|0.78 (0.13) |0.7 (0.18) |0.72 (0.09) |0.73
 DenseNet- 121 (mean ± SD)  | 0.8 (0.04) |0.86 (0.12) |0.8 (0.13) | 0.87 (0.06)| 0.81 (0.05)
 
 
-Fig 3. The most important regions for CICI classification
+Fig 3. The most important regions for CICI classification </br>
 <img src="/Project_classification/Figs/Critical_regions_axial.gif" alt="/Project_classification/Figs/Critical_regions_axial.gif" width="600"/>
 
 
