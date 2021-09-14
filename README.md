@@ -28,7 +28,7 @@ Due to some privacy ussue, this part cannot be shown here.
 </ol>
 
 
-### Phase 3: Construct 2 Volumetric CNN model using Tensorflow
+### Phase 3: Construct two Volumetric CNN models using Tensorflow
 
 > #### The CNN model I picked
 <ol> 
