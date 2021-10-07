@@ -146,7 +146,7 @@ class UNet_builder:
 
         upSampleB1 = upSample_U_Net_block(input_tensor=upSampleB0, input_tensor_2=downSampleB4, 
                                           filter_num=filter_num * 8, kernel_size=kernel_size)
-        upSampleB2 = upSample_U_Net_block(input_tensor=upSampleB1, input_tensor=downSampleB3, 
+        upSampleB2 = upSample_U_Net_block(input_tensor=upSampleB1, input_tensor_2=downSampleB3, 
                                           filter_num=filter_num * 8, kernel_size=kernel_size)
         upSampleB3 = upSample_U_Net_block(input_tensor=upSampleB2, input_tensor_2=downSampleB2, 
                                           filter_num=filter_num * 4, kernel_size=kernel_size)
