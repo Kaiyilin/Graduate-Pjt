@@ -68,7 +68,7 @@ def tf_random_rotate_image(im, im2):
     im2.set_shape(im2_shape)
     return (im,im2)
 
-
+# Set a callback for the validate data 
 class EvolRecord(tf.keras.callbacks.Callback):
   def on_epoch_end(self, epoch, logs=None):
     predict_img = self.model.generator.predict(ds.take(1).batch(1))
