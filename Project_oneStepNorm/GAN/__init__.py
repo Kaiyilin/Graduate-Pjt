@@ -1,5 +1,3 @@
 """__init__"""
 
-from .GAN import UNet_builder
-
-from .GAN import GAN
+from .GAN import GAN, cycleGAN_3D

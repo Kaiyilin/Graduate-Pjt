@@ -36,8 +36,6 @@ def padding_zeros(array, pad_size, channel_last = True):
     pad_list = list() 
     return pad_array
 
-
-
 def CleanArray(array):
     # clean x 
     NewArray = np.delete(array, np.s_[0:19:1], axis = 1)
@@ -100,7 +98,7 @@ The record of files which currently not support with this model is saved in \033
 src_imgs = np.concatenate(src_img_list, axis = 0)
 
 Generator = tf.keras.models.load_model('./Models')
-prdct = Generator.predict(src_imgs, batch_size=1, verbose = 1)
+prdct = Generator.predict(src_imgs, batch_size=1, verbose=1)
 
 try:
     prdct.numpy()

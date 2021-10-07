@@ -1,6 +1,6 @@
 from GAN import GAN
 import tensorflow as tf
-from GAN import UNet_builder
+from models_builder import UNet_builder
 from discriminator import toy_discriminator
 import functions.Basic_tool as bst
 import logging, os, sys, time, io
