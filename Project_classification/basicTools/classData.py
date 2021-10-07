@@ -4,9 +4,8 @@ import nibabel as nib
 from tensorflow.python.ops.gen_math_ops import ceil
 
 class Data(object):
-    def __init__(self) -> None:
-        pass
-
+    def __init__(self, image) -> None:
+        self.image = image
 
     # Data Preprocessing
     def normalised(image):
@@ -104,33 +103,3 @@ class Augmentation(Data):
         order = 0 if isseg == True else 5
             
         return scipy.ndimage.rotate(image, float(theta), axes=(0,1), reshape=False, order=order, mode='nearest') # Shall detemined reshape or not, also rotate toward which axis?
-
-class Padding(Data):
-    def __init__(self, data) -> None:
-        super().__init__()
-        self.data = data
-
-
-    def padding_func(array, pad_size):
-        # define padding size
-        elements = array.shape    
-        for element in elements:
-            if element > pad_size:
-                sys.exit('\nThe expanded dimension shall be greater than your current dimension')
-        pad_list = list() 
-        for i in range(array.ndim):
-            x = pad_size - array.shape[i]
-            if x%2 ==1:
-                y_1 = (x/2 +0.5)
-                y_2 = (x/2 -0.5)
-                z = (int(y_1),int(y_2))
-                pad_list.append(z)
-
-            else:
-                y = int(x/2)
-                z=(y,y)
-                pad_list.append(z)
-        pad_array = np.pad(array, pad_list, 'constant')
-        pad_list = list() 
-        return pad_array
-    

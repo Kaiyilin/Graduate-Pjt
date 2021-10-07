@@ -1,8 +1,7 @@
 import pymongo
-from functions.All_functions import *
-from functions.cm_tensorboard import *
-from functions.classVis import IntegratedGradients
-from resnet3d_variation import ResnetSE_3DBuilder
+import basicTools.All_functions
+from basicTools.classVis import IntegratedGradients
+from models.resnet3d_variation import ResnetSE_3DBuilder
 from sklearn.metrics import ( roc_curve, 
                               roc_auc_score, 
                               precision_score, 
