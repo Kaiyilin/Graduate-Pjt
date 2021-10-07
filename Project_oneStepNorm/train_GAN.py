@@ -11,12 +11,17 @@ from nilearn.image import resample_img
 import scipy.ndimage 
 
 # set log
-logging.basicConfig(filename = 'Execution_record.log', level = logging.WARNING, format = '%(filename)s %(message)s')
+logging.basicConfig(filename = 'Execution_record.log', 
+                    level = logging.WARNING, 
+                    format = '%(filename)s %(message)s')
+
 start_time = time.time()
 
 # Data Dir 
-data_dict = {"normalised": "./morm",
-             "raw": "./raw"}
+data_dict = {
+    "normalised": "./morm",
+    "raw": "./raw"
+    }
 
 # Set model hyperparameters
 input_shape = (128, 128, 128, 1)
@@ -37,23 +42,23 @@ g_lr = 2e-5
 loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
 def generator_loss(disc_generated_output, gen_output, target):
-  gan_loss = loss_object(tf.ones_like(disc_generated_output), disc_generated_output)
+    gan_loss = loss_object(tf.ones_like(disc_generated_output), disc_generated_output)
 
-  # mean absolute error
-  l1_loss = tf.reduce_mean(tf.abs(target - gen_output))
+    # mean absolute error
+    l1_loss = tf.reduce_mean(tf.abs(target - gen_output))
 
-  total_gen_loss = gan_loss + (_LAMBDA * l1_loss)
+    total_gen_loss = gan_loss + (_LAMBDA * l1_loss)
 
-  return total_gen_loss, gan_loss, l1_loss
+    return total_gen_loss, gan_loss, l1_loss
 
 def discriminator_loss(disc_real_output, disc_generated_output):
-  real_loss = loss_object(tf.ones_like(disc_real_output), disc_real_output)
+    real_loss = loss_object(tf.ones_like(disc_real_output), disc_real_output)
 
-  generated_loss = loss_object(tf.zeros_like(disc_generated_output), disc_generated_output)
+    generated_loss = loss_object(tf.zeros_like(disc_generated_output), disc_generated_output)
 
-  total_disc_loss = real_loss + generated_loss
+    total_disc_loss = real_loss + generated_loss
 
-  return total_disc_loss
+    return total_disc_loss
 
 # tf data mapping function for data augmentation
 def tf_random_rotate_image(im, im2):
@@ -69,7 +74,7 @@ def tf_random_rotate_image(im, im2):
     return (im,im2)
 
 # Set a callback for the validate data 
-class EvolRecord(tf.keras.callbacks.Callback):
+class evolRecord(tf.keras.callbacks.Callback):
   def on_epoch_end(self, epoch, logs=None):
     predict_img = self.model.generator.predict(ds.take(1).batch(1))
     plt.imshow(predict_img[0, :, :, 64, 0], cmap='gray')
@@ -89,7 +94,6 @@ for i in range(len(raw_file_list)):
     img = resample_img(img, target_affine=np.eye(3)*2., interpolation='nearest')
     imag_array = img.get_fdata()
     if imag_array.shape[0] <= 128: 
-        #imag_array = imag_array - imag_array.min()
         imag_array = bst.standardised(imag_array)
         imag_array = imag_array - imag_array.min()
         padded_imag_array = bst.padding_zeros(imag_array, pad_size=128)
@@ -137,8 +141,11 @@ os.mkdir(bst.checkpoint_dir)
 # Build models
 generator = UNet_builder.build_U_Net3D(input_shape, init_fil_Gen, kernel_size)
 
-discriminator = toy_discriminator.build_toy_discriminator(input_shape=dic_input_shape, init_filter_nums=init_fil_Dis, 
-                                                          init_kernel_size=kernel_size, kernel_init= kernel_initialiser_dis, repetitions = 1)
+discriminator = toy_discriminator.build_toy_discriminator(input_shape=dic_input_shape, 
+                                                          init_filter_nums=init_fil_Dis, 
+                                                          init_kernel_size=kernel_size, 
+                                                          kernel_init=kernel_initialiser_dis, 
+                                                          repetitions=1)
 
 
 # Linked the generator and discriminator to create a pix2pix model
@@ -150,16 +157,16 @@ discriminator_optimizer = tf.keras.optimizers.Adam(d_lr, beta_1=0.5)
 
 
 # Set up callbacks
-Tensorboard_callbacks = [tf.keras.callbacks.TensorBoard(log_dir = bst.logdir, 
-                                                        histogram_freq = 1, 
-                                                        write_graph = True, 
-                                                        write_images = False,
-                                                        update_freq = 'epoch', 
-                                                        profile_batch = 3, 
-                                                        embeddings_freq = 0,
-                                                        embeddings_metadata = None)]
+Tensorboard_callbacks = [tf.keras.callbacks.TensorBoard(log_dir=bst.logdir, 
+                                                        histogram_freq=1, 
+                                                        write_graph=True, 
+                                                        write_images=False,
+                                                        update_freq='epoch', 
+                                                        profile_batch=3, 
+                                                        embeddings_freq=0,
+                                                        embeddings_metadata=None)]
 
-ImgRecordCallbacks = EvolRecord()
+ImgRecordCallbacks = evolRecord()
 
 # Compile the model 
 pix2pix.compile(g_optimizer= generator_optimizer, 
@@ -167,10 +174,11 @@ pix2pix.compile(g_optimizer= generator_optimizer,
                 loss_fn= [generator_loss, discriminator_loss])
 
 # Fit the model 
-hist = pix2pix.fit(ds.skip(10).map(tf_random_rotate_image, num_parallel_calls=32).shuffle(50).batch(_batchSize), 
-                   epochs = _epochs,
-                   callbacks = [Tensorboard_callbacks, ImgRecordCallbacks],
-                   verbose = 1)
+hist = pix2pix.fit(ds.skip(10).map(tf_random_rotate_image, num_parallel_calls=32)
+                   .shuffle(50).batch(_batchSize), 
+                   epochs=_epochs,
+                   callbacks=[Tensorboard_callbacks, ImgRecordCallbacks],
+                   verbose=1)
 
 # Save the model at the end of training 
 pix2pix.save_all(bst.checkpoint_dir, "gen", "disc")
@@ -179,6 +187,7 @@ print(f"Training completed model saved in \033[92m {bst.checkpoint_dir}\033[00m"
 
 # Document the records of this trial to log
 duration = (time.time() - start_time) /60
-logging.warning(f"""Log Path: {bst.logdir}, Ckpt Path: {bst.checkpoint_dir}, Training_Duration: {duration:.2f} mins, l1_LossLambda: {_LAMBDA}, 
-                initail filter number of Generator: {init_fil_Gen}, initail filter number of Discriminator: {init_fil_Dis},
-                training in epoch:{_epochs}, batchSize: {_batchSize}, with G_LR: {g_lr} and D_LR: {d_lr}.""")
+logging.warning(f"""Log Path: {bst.logdir}, Ckpt Path: {bst.checkpoint_dir}, Training_Duration: {duration:.2f} mins, 
+                    l1_LossLambda: {_LAMBDA}, initail filter number of Generator: {init_fil_Gen}, 
+                    initail filter number of Discriminator: {init_fil_Dis}, training in epoch:{_epochs}, 
+                    batchSize: {_batchSize}, with G_LR: {g_lr} and D_LR: {d_lr}.""")

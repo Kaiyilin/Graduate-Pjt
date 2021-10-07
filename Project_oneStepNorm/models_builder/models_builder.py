@@ -4,9 +4,14 @@ import sys, os
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.models import Model, load_model
-from tensorflow.keras.layers import Input, Dense, Dropout, Flatten, Activation, BatchNormalization, Multiply
-from tensorflow.keras.layers import Conv3D, MaxPooling3D, Dropout, UpSampling3D, concatenate, Conv3DTranspose, AveragePooling3D
-from tensorflow.keras.regularizers import l1_l2
+from tensorflow.keras.layers import (Input, 
+                                    Dropout, 
+                                    Activation, 
+                                    BatchNormalization, 
+                                    Conv3D, 
+                                    Conv3DTranspose,
+                                    AveragePooling3D,
+                                    concatenate)
 import tensorflow.keras.backend as K
 #import functions.Basic_tool as bst
 
@@ -29,13 +34,18 @@ class UNet_builder:
             sys.exit(" Check the size of your input, a 3D input shall have dimenson 4")
     
     @staticmethod
-    def build_UNet3D(input_size, filter_num, kernel_size, pretrained_weights= None, trainable = True):
+    def build_UNet3D(input_size, 
+                     filter_num, 
+                     kernel_size, 
+                     pretrained_weights=None, 
+                     trainable=True):
         """
         The input ndim must eqaul to 4 
         """
         UNet_builder._DataHandler3D(input_size) 
 
-        def conv3d_bn_relu_block(input_tensors,filter_nums, kernel_size, init = 'he_normal', param = 0, batnorm=True):
+        def conv3d_bn_relu_block(input_tensors, filter_nums, kernel_size, 
+                                 init = 'he_normal', batnorm=True):
             """
             input_tensors: a 5-d array or tensor as input
             filter_nums: num of filters for 
@@ -47,41 +57,59 @@ class UNet_builder:
                     kernel_size, 
                     padding='same', 
                     use_bias=True,
-                    kernel_initializer = init,
-                    kernel_regularizer=l1_l2(l1=0,l2=param), 
-                    bias_regularizer=l1_l2(l1=0,l2=param))(input_tensors)
+                    kernel_initializer = init
+                    )(input_tensors)
+
             if batnorm == True:
                 y = BatchNormalization()(y)
+
             else:
                 pass
+
             act = Activation('relu')(y)
             return act
 
 
-        def downSample_U_Net_block(inputTensor, filter_num, kernel_size, addDropout=False):
-            conv1 = conv3d_bn_relu_block(inputTensor, filter_nums=filter_num, kernel_size=kernel_size)
-            conv1 = conv3d_bn_relu_block(conv1, filter_nums=filter_num, kernel_size=kernel_size)
+        def downSample_U_Net_block(inputTensor, filter_num, 
+                                   kernel_size, addDropout=False):
+
+            conv1 = conv3d_bn_relu_block(inputTensor, 
+                                         filter_nums=filter_num, 
+                                         kernel_size=kernel_size)
+
             if addDropout == True:
                 conv1 = Dropout(0.5)(conv1)
+
             else:
                 pass
+
             downSample = Conv3D(filter_num, 
                                 kernel_size, 
                                 strides=(2,2,2), 
-                                padding = 'same')(conv1)
+                                padding='same')(conv1)
+
             return conv1, downSample
 
-        def upSample_U_Net_block(inputTensor, inputTensor_2 ,filter_num, kernel_size):
+        def upSample_U_Net_block(inputTensor, inputTensor_2,
+                                 filter_num, kernel_size):
+
             upSample = Conv3DTranspose(filter_num, 
-                                    kernel_size, 
-                                    strides=(2,2,2), 
-                                    padding = 'same')(inputTensor)
+                                       kernel_size, 
+                                       strides=(2,2,2), 
+                                       padding='same')(inputTensor)
 
             concated_tensor = concatenate([upSample, inputTensor_2])
-            conv = conv3d_bn_relu_block(concated_tensor, filter_nums=filter_num, kernel_size=kernel_size)
-            conv = conv3d_bn_relu_block(conv, filter_nums=filter_num, kernel_size=kernel_size)
+
+            conv = conv3d_bn_relu_block(concated_tensor, 
+                                        filter_nums=filter_num, 
+                                        kernel_size=kernel_size)
+
+            conv = conv3d_bn_relu_block(conv, 
+                                        filter_nums=filter_num, 
+                                        kernel_size=kernel_size)
 
             return conv
+        
         input1 = Input(input_size)
         
         conv1, downSampleB1 = downSample_U_Net_block(input1, filter_num, kernel_size)
@@ -91,9 +119,17 @@ class UNet_builder:
         _, downSampleB5 = downSample_U_Net_block(downSampleB4, filter_num*8, kernel_size)
 
         # Shall have greatest feature map?
-        Latent_space = Conv3D(filter_num, (3,3,3), activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(downSampleB5)
+        Latent_space = Conv3D(filter_num, 
+                              kernel_size=(3,3,3), 
+                              activation='relu', 
+                              padding='same', 
+                              kernel_initializer='he_normal')(downSampleB5)
 
-        upSampleB0 = Conv3D(filter_num, (3,3,3),activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(Latent_space)
+        upSampleB0 = Conv3D(filter_num, 
+                            kernel_size=(3,3,3),
+                            activation='relu', 
+                            padding='same', 
+                            kernel_initializer='he_normal')(Latent_space)
 
         upSampleB1 = upSample_U_Net_block(upSampleB0, downSampleB4, filter_num*8, kernel_size)
         upSampleB2 = upSample_U_Net_block(upSampleB1, downSampleB3, filter_num*8, kernel_size)
@@ -102,92 +138,9 @@ class UNet_builder:
         upSampleB5 = upSample_U_Net_block(upSampleB4, conv1, filter_num, kernel_size)
 
 
-        conv10 = Conv3D(1, 1, activation = 'sigmoid')(upSampleB5)
+        conv10 = Conv3D(1, 1, activation='sigmoid')(upSampleB5)
 
-        model = Model(inputs = input1, outputs = conv10)
-
-        #model.compile(optimizer = Adam(lr = 1e-4), loss = 'binary_crossentropy', metrics = ['accuracy'])
-        
-        #model.summary()
-
-        if(pretrained_weights):
-            model.load_weights(pretrained_weights)
-
-        model.trainable = trainable
-        return model 
-
-    ### give a shot on putting dense block into U_Net
-    @staticmethod
-    def buid_Dense_U_Net3D(input_shape , init_filter_num=32, up_init_filter_num=32, up_kernel_size = (3,3,3), growth_rate = 16, pretrained_weights= None, trainable = True):
-        """
-        input_shape: The input ndim must eqaul to 4 otherwise the system would exit the code, 
-        init_filter_num: the number of extracting from, 
-        growth_rate: how may features added per convolution,
-        up_kernel_size: sele, 
-        pretrained_weights: Have Pretraiened weights? default is None, 
-        trainable = True"""
-        # Pre-defined building block
-        def bn_conv_swish(x,filters,kernel=(1,1,1),strides=1):
-            
-            x = BatchNormalization()(x)
-            x = Conv3D(filters, kernel, strides=strides,padding = 'same', kernel_initializer='he_normal', use_bias = False)(x)
-            x = Activation('swish')(x)
-            return x
-        
-        def dense_block(x, filters, growth_rate, repetition):
-            
-            for _ in range(repetition):
-                y = bn_conv_swish(x, filters)
-                y = bn_conv_swish(y, growth_rate, (3,3,3))
-                x = tf.keras.layers.concatenate([y,x])
-            return x
-    
-        def transition_layer(x):
-            x = bn_conv_swish(x, K.int_shape(x)[-1] //2 )
-            x = AveragePooling3D((2,2,2), strides = 2, padding = 'same')(x)
-            return x
-
-
-        def upSample_DenseUnet_block(inputTensor, inputTensor_2 ,filter_num, kernel_size):
-            upSample = Conv3DTranspose(filter_num, 
-                                       kernel_size, 
-                                       strides=(2,2,2), 
-                                       padding = 'same',
-                                       kernel_initializer= 'he_normal',
-                                       use_bias = False)(inputTensor)
-            upSample = Activation("swish")(upSample)
-            concated_tensor = concatenate([upSample, inputTensor_2])
-            conv = bn_conv_swish(concated_tensor, filters = filter_num, kernel=kernel_size)
-            conv = bn_conv_swish(conv, filters = filter_num, kernel=kernel_size)
-            return conv
-
-        UNet_builder._DataHandler3D(input_shape) 
-
-        input = Input(input_shape)
-        conv1 = Conv3D(32, (8,8,8), padding = 'same', strides=2)(input) # (N, 64,64,64,32)
-        conv2 = Conv3D(64, (3,3,3), padding = 'same', strides=2)(conv1) # (N, 32,32,32,32)
-        dense1 = dense_block(conv2, init_filter_num, growth_rate, 3) # (None, 32, 32, 32, 96+k*3)
-        trans1 = transition_layer(dense1)
-        dense2 = dense_block(trans1, init_filter_num, growth_rate, 4)# (None, 16, 16, 16, 96+k*4)
-        trans2 = transition_layer(dense2)
-        dense3 = dense_block(trans2, init_filter_num, growth_rate, 12) # (None, 8, 8, 8, 96+k*12)
-        trans3 = transition_layer(dense3)
-        dense4 = dense_block(trans3, init_filter_num, growth_rate, 8) # (None, 4, 4, 4, 96+k*8)
-        convTrans1 = upSample_DenseUnet_block(dense4, dense3, filter_num= up_init_filter_num, kernel_size=up_kernel_size)
-        convTrans2 = upSample_DenseUnet_block(convTrans1, dense2, filter_num= up_init_filter_num, kernel_size=up_kernel_size)
-        convTrans3 = upSample_DenseUnet_block(convTrans2, concatenate([dense1, conv2]),filter_num= up_init_filter_num, kernel_size=up_kernel_size)
-        convTrans4 = upSample_DenseUnet_block(convTrans3, conv1, filter_num= up_init_filter_num, kernel_size=up_kernel_size)
-        convTrans5 = Conv3DTranspose(32, up_kernel_size, 
-                                    strides = 2, 
-                                    padding = 'same', 
-                                    kernel_initializer = 'he_normal',
-                                    use_bias = False)(convTrans4)
-
-        Act = Activation("swish")(convTrans5)
-        lastConv = Conv3D(1,1, padding='same', use_bias=False)(Act)
-        lastAct = Activation("swish")(lastConv)
-
-        model = Model(inputs = input, outputs = lastAct)
+        model = Model(inputs=input1, outputs=conv10)
 
 
         if(pretrained_weights):
@@ -195,6 +148,7 @@ class UNet_builder:
 
         model.trainable = trainable
         return model 
+
 
 # --------------------------- cycleGAN class -----------------------------
 class cycleGAN_3D(tf.keras.Model):
@@ -225,24 +179,8 @@ class cycleGAN_3D(tf.keras.Model):
         self.cycle_loss = loss_fn[2]
         self.identity_loss = loss_fn[3]
 
-    """
-    # 1 - With the "Functional API", 
-    # where you start from Input, you chain layer calls to specify the model's forward pass,
-    # and finally you create your model from inputs and outputs
 
-    # 2 - By subclassing the Model class: in that case, 
-    # you should define your layers in __init__ and you should implement the model's forward pass in call.
-    # Check the custom layer documentation 
-    def call(self, inputs, training, mask):
-        return super().call(inputs, training=training, mask=mask)
-
-    # take the summary for showing all the trainable parameters
-    def summary(self, line_length, positions, print_fn):
-        return super().summary(line_length=line_length, positions=positions, print_fn=print_fn)
-    """
     def train_step(self, data):
-    # persistent is set to True because the tape is used more than
-    # once to calculate the gradients.
         real_x, real_y = data
         with tf.GradientTape(persistent=True) as tape:
         # Generator G translates X -> Y
@@ -312,7 +250,8 @@ class cycleGAN_3D(tf.keras.Model):
         print(self.discriminator_x.summary())
         print(self.discriminator_y.summary())
 
-    def save_all(self, save_path: str, genG_name: str, genF_name: str, disc_x_name: str, disc_y_name: str, mode = 0):
+    def save_all(self, save_path: str, genG_name: str, 
+            genF_name: str, disc_x_name: str, disc_y_name: str, mode = 0):
         """
         save_path: str, given a save path 
         genG_name: str, given a name for generatorG 

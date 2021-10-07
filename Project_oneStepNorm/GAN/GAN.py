@@ -3,14 +3,23 @@
 import sys, os
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.models import Model, load_model
-from tensorflow.keras.layers import Input, Dense, Dropout, Flatten, Activation, BatchNormalization, Multiply
-from tensorflow.keras.layers import Conv3D, MaxPooling3D, Dropout, UpSampling3D, concatenate, Conv3DTranspose
-#from keras.layers.merge import concatenate, add
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Input, 
+                                    Dropout, 
+                                    Activation, 
+                                    BatchNormalization, 
+                                    Conv3D, 
+                                    Conv3DTranspose, 
+                                    concatenate)
 from tensorflow.keras.regularizers import l1_l2
 #import functions.Basic_tool as bst
 
-def conv3d_bn_relu_block(input_tensors,filter_nums, kernel_size, init = 'he_normal', param = 0, batnorm=True):
+def conv3d_bn_relu_block(input_tensor,
+                         filter_nums, 
+                         kernel_size, 
+                         init='he_normal', 
+                         param=0, 
+                         batnorm=True):
     """
     input_tensors: a 5-d array or tensor as input
     filter_nums: num of filters for 
@@ -24,7 +33,8 @@ def conv3d_bn_relu_block(input_tensors,filter_nums, kernel_size, init = 'he_norm
                use_bias=True,
                kernel_initializer = init,
                kernel_regularizer=l1_l2(l1=0,l2=param), 
-               bias_regularizer=l1_l2(l1=0,l2=param))(input_tensors)
+               bias_regularizer=l1_l2(l1=0,l2=param))(input_tensor)
+    
     if batnorm == True:
         y = BatchNormalization()(y)
     else:
@@ -33,9 +43,19 @@ def conv3d_bn_relu_block(input_tensors,filter_nums, kernel_size, init = 'he_norm
     return act
 
 
-def downSample_U_Net_block(inputTensor, filter_num, kernel_size, addDropout=False):
-    conv1 = conv3d_bn_relu_block(inputTensor, filter_nums=filter_num, kernel_size=kernel_size)
-    conv1 = conv3d_bn_relu_block(conv1, filter_nums=filter_num, kernel_size=kernel_size)
+def downSample_U_Net_block(input_tensor, 
+                           filter_num, 
+                           kernel_size, 
+                           addDropout=False):
+
+    conv1 = conv3d_bn_relu_block(input_tensor=input_tensor, 
+                                 filter_nums=filter_num, 
+                                 kernel_size=kernel_size)
+
+    conv1 = conv3d_bn_relu_block(input_tensor=conv1, 
+                                 filter_nums=filter_num, 
+                                 kernel_size=kernel_size)
+
     if addDropout == True:
         conv1 = Dropout(0.5)(conv1)
     else:
@@ -43,18 +63,27 @@ def downSample_U_Net_block(inputTensor, filter_num, kernel_size, addDropout=Fals
     downSample = Conv3D(filter_num, 
                         kernel_size, 
                         strides=(2,2,2), 
-                        padding = 'same')(conv1)
+                        padding='same')(conv1)
     return conv1, downSample
 
-def upSample_U_Net_block(inputTensor, inputTensor_2 ,filter_num, kernel_size):
+def upSample_U_Net_block(inputTensor, 
+                         inputTensor_2,
+                         filter_num, 
+                         kernel_size):
+    
     upSample = Conv3DTranspose(filter_num, 
                                kernel_size, 
                                strides=(2,2,2), 
-                               padding = 'same')(inputTensor)
+                               padding='same')(inputTensor)
 
     concated_tensor = concatenate([upSample, inputTensor_2])
-    conv = conv3d_bn_relu_block(concated_tensor, filter_nums=filter_num, kernel_size=kernel_size)
-    conv = conv3d_bn_relu_block(conv, filter_nums=filter_num, kernel_size=kernel_size)
+    conv = conv3d_bn_relu_block(input_tensor=concated_tensor, 
+                                filter_nums=filter_num, 
+                                kernel_size=kernel_size)
+    
+    conv = conv3d_bn_relu_block(input_tensor=conv, 
+                                filter_nums=filter_num, 
+                                kernel_size=kernel_size)
 
     return conv
 
@@ -133,24 +162,9 @@ class GAN(tf.keras.Model):
         super(GAN, self).compile()
         self.g_optimizer = g_optimizer
         self.d_optimizer = d_optimizer
-        ### define loss
         self.generator_loss = loss_fn[0]
         self.discriminator_loss = loss_fn[1]
-    """
-    # 1 - With the "Functional API", 
-    # where you start from Input, you chain layer calls to specify the model's forward pass,
-    # and finally you create your model from inputs and outputs
 
-    # 2 - By subclassing the Model class: in that case, 
-    # you should define your layers in __init__ and you should implement the model's forward pass in call.
-    # Check the custom layer documentation 
-    def call(self, inputs, training, mask):
-        return super().call(inputs, training=training, mask=mask)
-
-    # take the summary for showing all the trainable parameters
-    def summary(self, line_length, positions, print_fn):
-        return super().summary(line_length=line_length, positions=positions, print_fn=print_fn)
-    """
     def train_step(self, data):
         input_image, target = data
         with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
@@ -161,11 +175,15 @@ class GAN(tf.keras.Model):
             fake_input =tf.keras.layers.concatenate([input_image, gen_output],axis=-1)
             disc_generated_output = self.discriminator(fake_input, training=True)
 
-            gen_total_loss, gen_gan_loss, gen_l1_loss = self.generator_loss(disc_generated_output, gen_output, target)
-            disc_loss = self.discriminator_loss(disc_real_output, disc_generated_output)
+            gen_total_loss, gen_gan_loss, gen_l1_loss = self.generator_loss(disc_generated_output, 
+                                                                            gen_output, target)
+
+            disc_loss = self.discriminator_loss(disc_real_output, 
+                                                disc_generated_output)
 
         generator_gradients = gen_tape.gradient(gen_total_loss,
                                                 self.generator.trainable_variables)
+                                                
         discriminator_gradients = disc_tape.gradient(disc_loss,
                                                      self.discriminator.trainable_variables)
 
@@ -173,6 +191,7 @@ class GAN(tf.keras.Model):
                                              self.generator.trainable_variables))
         self.d_optimizer.apply_gradients(zip(discriminator_gradients,
                                              self.discriminator.trainable_variables))
+
         return {"gen_total_loss":gen_total_loss, "gen_gan_loss": gen_gan_loss, "gen_l1_loss": gen_l1_loss, 'disc_loss': disc_loss}
 
     def summary_all(self):
@@ -195,9 +214,11 @@ class GAN(tf.keras.Model):
         if mode == 0:
             self.generator.save(os.path.join(save_path, f"{gen_name}.h5"))
             self.discriminator.save(os.path.join(save_path, f"{disc_name}.h5"))
-        elif mode ==1:
+
+        elif mode == 1:
             self.generator.save_weights(os.path.join(save_path, f"{gen_name}.h5"))
             self.discriminator.save_weights(os.path.join(save_path, f"{disc_name}.h5"))
+        
         else:
             sys.exit('The mode should be chosen in either 0 or 1 if you truly like to save models')
     

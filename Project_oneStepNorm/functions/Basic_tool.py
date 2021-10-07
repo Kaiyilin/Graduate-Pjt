@@ -23,7 +23,7 @@ def standardised(image):
     return img 
 
 # Read files
-def myreadfile(dirr, norm = True):
+def myreadfile(dirr, norm=True):
     """
     This version can import 3D array regardless of the size
     """
@@ -50,8 +50,8 @@ def myreadfile(dirr, norm = True):
 
     return number, imgs_array, path_list
 
-def padding_zeros(array, pad_size, channel_last = True):
-    # define padding size
+def padding_zeros(array, pad_size, channel_last=True):
+    
     elements = array.shape    
     for element in elements:
         if element > pad_size:
@@ -75,39 +75,6 @@ def padding_zeros(array, pad_size, channel_last = True):
     pad_list = list() 
     return pad_array
 
-
-def myreadfile_pad(dirr, pad_size, channel_last = True, pre_processing = None):
-    """
-    dirr = 
-    pad_size = 
-    channel_last = 
-    pre_processing: string "norm" for normalised or "stand" for standardised, the other input would not doing anything
-    """
-    
-    imgs_array = np.array([])
-    path_list=[f for f in os.listdir(dirr) if not f.startswith('.')]
-    path_list.sort()
-    array_list = []
-    for file in path_list:
-        if file.endswith(".nii"):
-            #print(os.path.join(dirr, file))
-            img = nib.load(os.path.join(dirr, file))
-            img_array = img.get_fdata()
-            if isinstance(pre_processing, str):
-                if pre_processing.lower() == "norm":
-                    img_array = data_preprocessing(img_array)
-                elif pre_processing.lower() == "stand":
-                    img_array = standardised(img_array)
-                else:
-                    pass
-            else:
-                pass
-            img_array = padding_zeros(img_array, pad_size, channel_last)
-            img_array = img_array[None,...]
-            array_list.append(img_array)
-    imgs_array = np.concatenate(array_list, axis=0)
-    return imgs_array
-
 def model_structure(model):
     """
     Visualise model's architecture
@@ -120,14 +87,13 @@ def model_structure(model):
 
 # tensorboard log directiory
 logdir="./logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
 # model checkpoint
 checkpoint_dir ="./trckpt/"+ datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 checkpoint_prefix = os.path.join(checkpoint_dir, "weights-{epoch:02d}.hdf5")
 
 print(checkpoint_dir)
 print(logdir)
-
 print("\ntf.__version__ is", tf.__version__)
 print("\ntf.keras.__version__ is:", tf.keras.__version__)
-
 print('\nImport completed')
