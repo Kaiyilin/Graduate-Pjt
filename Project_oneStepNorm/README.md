@@ -32,11 +32,15 @@ The original paper of pix2pix can be seen at [here](https://arxiv.org/abs/1611.0
 In my project, I modified the generator into a self-constructed volumetric [U-Net](https://arxiv.org/abs/1505.04597)</br>
 The discriminator is another self-constructed volumetric Convolutional Neural Network (CNN)
 
-The overall architectures of generators and discriminators can be seen at [here](./Data_distribution/Report/)
+The overall architectures of generators and discriminators can be seen at Figure 3 and 4
 
+Fig 3. The architecture of generator <br>
+<img src="./Data_distribution/Report/gen.png" alt= Oops_somthing_wrong width="600"/>
 
+Fig 4. The architecture of discriminator <br>
+<img src="./Data_distribution/Report/dis.png" alt= Oops_somthing_wrong width="600"/>
 
-Fig 3. The learning curve of pix2pix model </br>
+Fig 5. The learning curve of pix2pix model </br>
 
 <img src="./Data_distribution/itpjt/Figure_1.png" alt="./Data_distribution/itpjt/Figure_1.png" width="600"/>
 
