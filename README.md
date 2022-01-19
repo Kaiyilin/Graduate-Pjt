@@ -1,5 +1,5 @@
 # Graduate-Pjt
-Summarise to work I have done in graduate school
+Summarise to the works I have done in graduate school
 
 <ol>
   <li> CICI classification: Classification and visualisation of chemotherapy induced cognitive impairment in Volumetric Convolutional Neural Network </li>
