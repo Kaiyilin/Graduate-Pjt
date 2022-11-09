@@ -1,4 +1,4 @@
-import os 
+import os
 import time
 import scipy
 import argparse
@@ -22,7 +22,7 @@ def main():
     parser.add_argument('--disc_input_shape', default=prjt_configs["model"]["disc_input_shape"])
     parser.add_argument('--gen_filter_nums', type=int, default=prjt_configs["train"]["gen_filter_nums"])
     parser.add_argument('--disc_filter_nums', type=int, default=prjt_configs["train"]["disc_filter_nums"])
-    parser.add_argument('--kernel_size', type=int, default=prjt_configs["train"]["kernel_size"]) 
+    parser.add_argument('--kernel_size', type=int, default=prjt_configs["train"]["kernel_size"])
     parser.add_argument('--g_lr', type=float, default=prjt_configs["train"]["g_lr"])
     parser.add_argument('--d_lr', type=float, default=prjt_configs["train"]["d_lr"])
     parser.add_argument('--lambda', type=int, default=prjt_configs["train"]["_lambda"])
@@ -30,6 +30,7 @@ def main():
     parser.add_argument('--epochs', type=int, default=prjt_configs["train"]["_epochs"])
 
     # Parse the argument and store it in a dictionary:
+    # vars returns the __dict__ attribute of the given object.
     args = vars(parser.parse_args())
 
     try:
@@ -42,11 +43,10 @@ def main():
 
     # Set a logger for info
     logging.basicConfig(
-        filename = './execution_record.log', 
-        level = logging.WARNING, 
+        filename = './execution_record.log',
+        level = logging.WARNING,
         format = '%(filename)s %(message)s'
         )
-
 
     # Self-defined loss function for GAN
     loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
@@ -102,7 +102,7 @@ def main():
         callbacks=None,
         verbose=1
         )
-    
+
     hist_df = pd.DataFrame(hist.history)
     hist_df.to_csv(os.path.join(args["log_path"], "historty.csv"))
 
@@ -111,7 +111,7 @@ def main():
     
     # log records
     duration = (time.time() - start_time) / 60
-
+    print("test_PR")
     logging.warning(f"""Log Path: {args["log_path"]}, Ckpt Path: {args["ckpt_path"]}, 
                     Training_Duration: {duration:.2f} mins, l1_LossLambda: {args["lambda"]}, 
                     initail filter number of Generator: {args["gen_filter_nums"]}, 
