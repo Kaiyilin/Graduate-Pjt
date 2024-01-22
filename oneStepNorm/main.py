@@ -9,10 +9,13 @@ import tensorflow as tf
 from configs import prjt_configs
 from GAN import GAN
 from generator import UNet_builder
-from discriminator import toy_discriminator
-from utils.model_stru_vis import model_structure_vis
+from discriminator.ToyDiscriminator import ToyDiscriminator
 from utils.augmentation import tf_random_rotate_image
-from dataloader.dataloader import ds
+from dataloader.dataloader import DataLoader
+# from dataloader.dataloader import ds
+
+LOG_NAME = "execution_record.log"
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -40,6 +43,7 @@ def main():
         print(e)
 
     start_time = time.time()
+
 
     # Set a logger for info
     logging.basicConfig(
@@ -70,13 +74,18 @@ def main():
         total_disc_loss = real_loss + generated_loss
 
         return total_disc_loss
+    
+    ds = DataLoader(
+        raw_data_path = prjt_configs,
+        paired_data_path= prjt_configs
+    )
 
     # create generator and discriminator
     generator = UNet_builder.build_U_Net3D(input_size=args["gen_input_shape"], 
                                            filter_num=args["gen_filter_nums"], 
                                            kernel_size=args["kernel_size"])
 
-    discriminator = toy_discriminator.build_toy_discriminator(input_shape=args["disc_input_shape"], 
+    discriminator = ToyDiscriminator.build_toy_discriminator(input_shape=args["disc_input_shape"], 
                                                               init_filter_nums=args["disc_filter_nums"], 
                                                               init_kernel_size=args["kernel_size"], 
                                                               kernel_init=tf.random_normal_initializer(0., 0.02), 
