@@ -10,7 +10,7 @@ TARGET_AFFINE = np.eye(3)*2
 
 
 class DataLoader(object):
-    def __init__(self, raw_data_path: str, paired_data_path: str) -> None:
+    def __init__(self, raw_data_path: str=None, paired_data_path: str=None) -> None:
         self.raw_data_path = raw_data_path
         self.paired_data_path = paired_data_path
 
@@ -101,7 +101,7 @@ class DataLoader(object):
 
         # Make sure the data fits criteria
         if raw_img.shape == nor_img.shape and nor_img.dtype == raw_img.dtype:
-            ds = tf.data.Dataset.from_tensor_slices((raw_img, nor_img))
+            ds = tf.data.Dataset.from_tensor_slices((raw_img, nor_img)) # make it into tf dataset
         else:
             print("Shape of source img: ", raw_img.shape)
             print("Shape of target img: ", nor_img.shape)

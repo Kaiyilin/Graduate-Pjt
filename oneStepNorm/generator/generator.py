@@ -101,7 +101,7 @@ class UNet_builder:
         super().__init__()
 
 
-    def _DataHandler3D(input_size):
+    def _data_handler3D(input_size):
         """
         Handling the size of input data
         """
@@ -119,7 +119,7 @@ class UNet_builder:
         simplified the code with different pieces of functions,
         instead of series of  code like this 
         """
-        UNet_builder._DataHandler3D(input_size) 
+        UNet_builder._data_handler3D(input_size) 
 
         input1 = Input(input_size)
         

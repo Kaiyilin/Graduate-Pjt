@@ -1,6 +1,5 @@
 import os
 import time
-import scipy
 import argparse
 import logging
 import numpy as np
@@ -31,16 +30,15 @@ def main():
     parser.add_argument('--lambda', type=int, default=prjt_configs["train"]["_lambda"])
     parser.add_argument('--batchsize', type=int, default=prjt_configs["train"]["_batchSize"])
     parser.add_argument('--epochs', type=int, default=prjt_configs["train"]["_epochs"])
+    parser.add_argument('--raw_data_path', type=str, default=prjt_configs["data_path"]["raw"])
+    parser.add_argument('--paired_data_path', type=str, default=prjt_configs["data_path"]["normalised"])
 
     # Parse the argument and store it in a dictionary:
     # vars returns the __dict__ attribute of the given object.
     args = vars(parser.parse_args())
 
-    try:
-        os.makedirs(args["log_path"])
-        os.makedirs(args["ckpt_path"])
-    except FileExistsError as e:
-        print(e)
+    os.makedirs(args["log_path"], exist_ok=True)
+    os.makedirs(args["ckpt_path"], exist_ok=True)
 
     start_time = time.time()
 
@@ -48,7 +46,7 @@ def main():
     # Set a logger for info
     logging.basicConfig(
         filename = './execution_record.log',
-        level = logging.WARNING,
+        level = logging.INFO,
         format = '%(filename)s %(message)s'
         )
 
@@ -75,10 +73,13 @@ def main():
 
         return total_disc_loss
     
+    # prepared dataset
     ds = DataLoader(
-        raw_data_path = prjt_configs,
-        paired_data_path= prjt_configs
+        raw_data_path = args["raw_data_path"],
+        paired_data_path= args["paired_data_path"]
     )
+
+    ds = ds.prepared_dataset()
 
     # create generator and discriminator
     generator = UNet_builder.build_U_Net3D(input_size=args["gen_input_shape"], 
@@ -99,9 +100,9 @@ def main():
     discriminator_optimizer = tf.keras.optimizers.Adam(args["d_lr"], beta_1=0.5)
 
     # Compile the model 
-    pix2pix.compile(g_optimizer= generator_optimizer, 
-                    d_optimizer = discriminator_optimizer,
-                    loss_fn= [generator_loss, discriminator_loss])
+    pix2pix.compile(g_optimizer=generator_optimizer, 
+                    d_optimizer=discriminator_optimizer,
+                    loss_fn=[generator_loss, discriminator_loss])
 
     # Fit the model 
     hist = pix2pix.fit(
@@ -120,8 +121,8 @@ def main():
     
     # log records
     duration = (time.time() - start_time) / 60
-    print("test_PR")
-    logging.warning(f"""Log Path: {args["log_path"]}, Ckpt Path: {args["ckpt_path"]}, 
+
+    logging.info(f"""Log Path: {args["log_path"]}, Ckpt Path: {args["ckpt_path"]}, 
                     Training_Duration: {duration:.2f} mins, l1_LossLambda: {args["lambda"]}, 
                     initail filter number of Generator: {args["gen_filter_nums"]}, 
                     initail filter number of Discriminator: {args["disc_filter_nums"]},

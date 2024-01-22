@@ -6,7 +6,7 @@ prjt_configs = {
         "ckpt_path" : "./ckpt_path/"
     },
 
-    "data": {    
+    "data_path": {    
         "raw" : "./raw", 
         "normalised" : "./normalized"
         },
