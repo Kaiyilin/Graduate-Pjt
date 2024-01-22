@@ -13,7 +13,7 @@ from tensorflow.keras.layers import (Input,
                                      AveragePooling3D)
 import tensorflow.keras.backend as K
 
-class toy_discriminator(object):
+class ToyDiscriminator(object):
 
     @staticmethod
     def bn_conv_act(x, 
@@ -43,20 +43,20 @@ class toy_discriminator(object):
         """ for every repetions, the size of image will shrink to half, 
         """
         inputs = Input(input_shape, name ='input_imgs')
-        down = toy_discriminator.bn_conv_act(inputs, 
+        down = ToyDiscriminator.bn_conv_act(inputs, 
                                             filters=init_filter_nums, 
                                             kernel=init_kernel_size, 
                                             kernel_init=kernel_init,
                                             strides=2)
         for rep in range(repetitions):
             init_filter_nums *= 2 
-            down = toy_discriminator.bn_conv_act(down, 
+            down = ToyDiscriminator.bn_conv_act(down, 
                                                  filters=init_filter_nums, 
                                                  kernel=init_kernel_size, 
                                                  kernel_init=kernel_init,
                                                  strides=2)
 
-        pre_conv = toy_discriminator.bn_conv_act(down, 
+        pre_conv = ToyDiscriminator.bn_conv_act(down, 
                                                 filters=init_filter_nums*2, 
                                                 kernel=init_kernel_size, 
                                                 kernel_init=kernel_init,
