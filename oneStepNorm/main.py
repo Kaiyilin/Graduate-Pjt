@@ -15,6 +15,7 @@ from dataloader.dataloader import DataLoader
 
 LOG_NAME = "execution_record.log"
 
+# tf.config.run_functions_eagerly(True)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -75,8 +76,8 @@ def main():
     
     # prepared dataset
     ds = DataLoader(
-        raw_data_path = args["raw_data_path"],
-        paired_data_path= args["paired_data_path"]
+        raw_data_path=args["raw_data_path"],
+        paired_data_path=args["paired_data_path"]
     )
 
     ds = ds.prepared_dataset()
@@ -102,7 +103,8 @@ def main():
     # Compile the model 
     pix2pix.compile(g_optimizer=generator_optimizer, 
                     d_optimizer=discriminator_optimizer,
-                    loss_fn=[generator_loss, discriminator_loss])
+                    loss_fn=[generator_loss, discriminator_loss],
+                    )
 
     # Fit the model 
     hist = pix2pix.fit(
@@ -110,7 +112,7 @@ def main():
         .shuffle(50).batch(args["batchsize"]), 
         epochs=args["epochs"],
         callbacks=None,
-        verbose=1
+        verbose=1,
         )
 
     hist_df = pd.DataFrame(hist.history)

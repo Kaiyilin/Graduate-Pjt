@@ -7,8 +7,8 @@ prjt_configs = {
     },
 
     "data_path": {    
-        "raw" : "./raw", 
-        "normalised" : "./normalized"
+        "raw" : "./data_raw", 
+        "normalised" : "./data_normalized"
         },
 
     "train": {

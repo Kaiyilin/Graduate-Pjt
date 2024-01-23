@@ -69,7 +69,9 @@ class DataLoader(object):
 
         # Only data with image shape < (128, 128, 128)
         for i in range(len(raw_file_list)):
-            img = nib.load(os.path.join(os.listdir(self.raw_data_path), raw_file_list[i]))
+            img = nib.load(
+                os.path.join(self.raw_data_path, raw_file_list[i])
+                )
             img = resample_img(img, target_affine=TARGET_AFFINE, interpolation='nearest')
             imag_array = img.get_fdata()
             
